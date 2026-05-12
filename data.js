@@ -31,9 +31,7 @@ async function fetchSheetData() {
       product_name: headers.indexOf("PRODUCT_NAME"),
       brand: headers.indexOf("BRAND"),
       upc: headers.indexOf("UPC"),
-      mrp: headers.indexOf("MRP"),
-      threshold: headers.indexOf("THRESHOLD"),
-      uom: headers.indexOf("UOM")
+      mrp: headers.indexOf("MRP")
     };
 
     // Parse rows into objects, dedup by ITEM_ID (keep last with valid data)
@@ -50,7 +48,6 @@ async function fetchSheetData() {
       if (!productName) continue;
 
       const mrpVal = parseFloat((row[colMap.mrp] || "0").trim()) || 0;
-      const threshVal = parseInt((row[colMap.threshold] || "0").trim()) || 0;
 
       const item = {
         item_id: itemId,
@@ -58,12 +55,8 @@ async function fetchSheetData() {
         brand: (row[colMap.brand] || "").trim(),
         upc: (row[colMap.upc] || "").trim(),
         mrp: mrpVal,
-        threshold: threshVal || Math.ceil(Math.random() * 10) + 2, // Generate if empty
-        uom: (row[colMap.uom] || "Pcs").trim(),
-        qty: Math.floor(Math.random() * 50), // Simulated qty (connect your stock API for real)
         category: guessCategory((row[colMap.brand] || "").trim(), productName),
-        image: "https://cdn-icons-png.flaticon.com/128/3081/3081559.png",
-        last_updated: generateRecentDate()
+        image: "https://cdn-icons-png.flaticon.com/128/3081/3081559.png"
       };
 
       // Keep the entry — if duplicate ITEM_ID, overwrite (last wins)
@@ -151,16 +144,6 @@ function guessCategory(brand, name) {
   return "General";
 }
 
-/**
- * Generate a recent random date for demo purposes.
- */
-function generateRecentDate() {
-  const d = new Date();
-  d.setDate(d.getDate() - Math.floor(Math.random() * 14));
-  d.setHours(Math.floor(Math.random() * 14) + 6);
-  d.setMinutes(Math.floor(Math.random() * 60));
-  return d.toISOString();
-}
 
 // ============================================================
 // API Configuration Templates (for future backend integration)
