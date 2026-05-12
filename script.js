@@ -83,7 +83,7 @@ function animateCounter(el, target, prefix = '', suffix = '') {
 // ===== UPDATE STATS =====
 function updateStats() {
   const total = inventoryData.length;
-  const value = inventoryData.reduce((s, i) => s + (Number(i.mrp) * Number(i.qty)), 0);
+  const value = inventoryData.reduce((s, i) => s + Number(i.mrp), 0);
 
   animateCounter(document.getElementById('statTotalNum'), total);
   animateCounter(document.getElementById('statValueNum'), value, '₹');
@@ -104,9 +104,6 @@ function lookupProduct() {
     return;
   }
 
-  const s = getStatus(item);
-  const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return d; } };
-
   result.innerHTML = `
     <div class="lr-product">
       <img class="lr-img" src="${item.image}" alt="${item.product_name}">
@@ -117,12 +114,6 @@ function lookupProduct() {
         <div class="lr-field"><span class="lr-label">Brand</span><span class="lr-value">${item.brand}</span></div>
         <div class="lr-field"><span class="lr-label">Category</span><span class="lr-value">${item.category}</span></div>
         <div class="lr-field"><span class="lr-label">MRP</span><span class="lr-value">₹${Number(item.mrp).toLocaleString('en-IN')}</span></div>
-        <div class="lr-field"><span class="lr-label">Quantity</span><span class="lr-value">${item.qty}</span></div>
-        <div class="lr-field"><span class="lr-label">Threshold</span><span class="lr-value">${item.threshold}</span></div>
-        <div class="lr-field"><span class="lr-label">UOM</span><span class="lr-value">${item.uom}</span></div>
-        <div class="lr-field"><span class="lr-label">Status</span><span class="lr-value"><span class="status-pill ${s.cls}">${s.label}</span></span></div>
-        <div class="lr-field"><span class="lr-label">Last Updated</span><span class="lr-value">${fmtDate(item.last_updated)}</span></div>
-        <div class="lr-field"><span class="lr-label">Inventory Value</span><span class="lr-value">₹${(Number(item.mrp) * Number(item.qty)).toLocaleString('en-IN')}</span></div>
       </div>
     </div>`;
   showToast('Product found: ' + item.product_name, 'success');
@@ -138,41 +129,22 @@ function populateFilters() {
   cf.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
-// ===== GET STATUS =====
-function getStatus(item) {
-  const q = Number(item.qty), t = Number(item.threshold);
-  if (q === 0) return { label: 'OUT OF STOCK', cls: 'pill-out' };
-  if (q < t) return { label: 'LOW', cls: 'pill-low' };
-  return { label: 'GOOD', cls: 'pill-good' };
-}
-
 // ===== APPLY FILTERS =====
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase();
   const vendor = document.getElementById('vendorFilter').value;
   const category = document.getElementById('categoryFilter').value;
-  const includeZero = document.getElementById('includeZeroQty').checked;
 
   filteredData = inventoryData.filter(item => {
     const matchSearch = !search || item.product_name.toLowerCase().includes(search) || item.upc.toLowerCase().includes(search) || item.item_id.toLowerCase().includes(search);
     const matchVendor = !vendor || item.brand === vendor;
     const matchCat = !category || item.category === category;
-    const matchStock = currentStockFilter === 'all' || (currentStockFilter === 'good' && Number(item.qty) >= Number(item.threshold)) || (currentStockFilter === 'low' && Number(item.qty) > 0 && Number(item.qty) < Number(item.threshold)) || (currentStockFilter === 'out' && Number(item.qty) === 0);
-    const matchZero = includeZero || Number(item.qty) > 0;
-    return matchSearch && matchVendor && matchCat && matchStock && matchZero;
+    return matchSearch && matchVendor && matchCat;
   });
 
   if (currentSort.key) sortData(currentSort.key, false);
   currentPage = 1;
   renderTable();
-}
-
-// ===== STOCK FILTER =====
-function setStockFilter(type) {
-  currentStockFilter = type;
-  document.querySelectorAll('.stock-filter-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
-  applyFilters();
 }
 
 // ===== SORT =====
@@ -183,8 +155,7 @@ function sortData(key, toggle = true) {
   }
   filteredData.sort((a, b) => {
     let va = a[key], vb = b[key];
-    if (key === 'mrp' || key === 'qty' || key === 'threshold') { va = Number(va); vb = Number(vb); }
-    else if (key === 'status') { va = getStatus(a).label; vb = getStatus(b).label; }
+    if (key === 'mrp') { va = Number(va); vb = Number(vb); }
     else { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
     if (va < vb) return currentSort.dir === 'asc' ? -1 : 1;
     if (va > vb) return currentSort.dir === 'asc' ? 1 : -1;
@@ -210,10 +181,7 @@ function renderTable() {
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('pagination').style.display = 'flex';
 
-  const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch (e) { return d; } };
-
   tbody.innerHTML = pageData.map((item, idx) => {
-    const s = getStatus(item);
     return `<tr style="animation:fadeIn .3s ${idx * .03}s both">
       <td>${start + idx + 1}</td>
       <td><img class="product-img" src="${item.image}" alt="${item.product_name}"></td>
@@ -223,11 +191,6 @@ function renderTable() {
       <td>${item.brand}</td>
       <td>${item.category}</td>
       <td>₹${Number(item.mrp).toLocaleString('en-IN')}</td>
-      <td><strong>${item.qty}</strong></td>
-      <td>${item.threshold}</td>
-      <td>${item.uom}</td>
-      <td><span class="status-pill ${s.cls}">${s.label}</span></td>
-      <td>${fmtDate(item.last_updated)}</td>
       <td><div class="row-actions">
         <button class="row-action-btn history" title="History" onclick="viewHistory('${item.item_id}')"><i class="fas fa-history"></i></button>
         <button class="row-action-btn edit" title="Edit" onclick="editItem('${item.item_id}')"><i class="fas fa-edit"></i></button>
@@ -274,7 +237,7 @@ function editItem(id) {
   const item = inventoryData.find(i => i.item_id === id);
   if (!item) return;
   const body = document.getElementById('editModalBody');
-  body.innerHTML = ['product_name', 'brand', 'category', 'mrp', 'qty', 'threshold', 'uom'].map(k =>
+  body.innerHTML = ['product_name', 'brand', 'category', 'mrp'].map(k =>
     `<div class="form-group"><label>${k.replace(/_/g, ' ').toUpperCase()}</label><input id="edit_${k}" value="${item[k]}"></div>`
   ).join('');
   openModal('editModal');
@@ -283,11 +246,10 @@ function editItem(id) {
 function saveEdit() {
   const item = inventoryData.find(i => i.item_id === editingItemId);
   if (!item) return;
-  ['product_name', 'brand', 'category', 'mrp', 'qty', 'threshold', 'uom'].forEach(k => {
+  ['product_name', 'brand', 'category', 'mrp'].forEach(k => {
     const v = document.getElementById('edit_' + k).value;
-    item[k] = (k === 'mrp' || k === 'qty' || k === 'threshold') ? Number(v) : v;
+    item[k] = (k === 'mrp') ? Number(v) : v;
   });
-  item.last_updated = new Date().toISOString();
   closeModal('editModal');
   applyFilters();
   updateStats();
@@ -390,7 +352,6 @@ function initEventListeners() {
   document.getElementById('searchInput').addEventListener('input', applyFilters);
   document.getElementById('vendorFilter').addEventListener('change', applyFilters);
   document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-  document.getElementById('includeZeroQty').addEventListener('change', applyFilters);
 
   // Lookup Enter key
   document.getElementById('lookupInput').addEventListener('keydown', (e) => {
