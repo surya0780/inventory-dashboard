@@ -115,6 +115,11 @@ function lookupProduct() {
         <div class="lr-field"><span class="lr-label">Category</span><span class="lr-value">${item.category}</span></div>
         <div class="lr-field"><span class="lr-label">MRP</span><span class="lr-value">₹${Number(item.mrp).toLocaleString('en-IN')}</span></div>
       </div>
+      <div class="lr-qr">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(item.upc)}&size=150x150&bgcolor=ffffff&color=0f172a&margin=8" alt="QR Code">
+        <span class="lr-qr-label">UPC QR Code</span>
+        <button class="lr-qr-btn" onclick="showQR('${item.upc}', '${item.product_name.replace(/'/g, "\\'")}')"><i class="fas fa-expand"></i> View Full</button>
+      </div>
     </div>`;
   showToast('Product found: ' + item.product_name, 'success');
 }
@@ -192,6 +197,7 @@ function renderTable() {
       <td>${item.category}</td>
       <td>₹${Number(item.mrp).toLocaleString('en-IN')}</td>
       <td><div class="row-actions">
+        <button class="row-action-btn qr" title="QR Code" onclick="showQR('${item.upc}', '${item.product_name.replace(/'/g, "\\'")}')"><i class="fas fa-qrcode"></i></button>
         <button class="row-action-btn history" title="History" onclick="viewHistory('${item.item_id}')"><i class="fas fa-history"></i></button>
         <button class="row-action-btn edit" title="Edit" onclick="editItem('${item.item_id}')"><i class="fas fa-edit"></i></button>
         <button class="row-action-btn delete" title="Delete" onclick="deleteItem('${item.item_id}')"><i class="fas fa-trash"></i></button>
@@ -503,4 +509,35 @@ function initCharts() {
 function updateCharts() {
   Object.values(chartInstances).forEach(c => c.destroy());
   initCharts();
+}
+
+// ===== QR CODE =====
+function showQR(upc, productName) {
+  if (!upc) {
+    showToast('No UPC available for this product', 'error');
+    return;
+  }
+  const modal = document.getElementById('qrModal');
+  const img = document.getElementById('qrImage');
+  const title = document.getElementById('qrProductName');
+  const upcText = document.getElementById('qrUpcText');
+
+  title.textContent = productName;
+  upcText.textContent = `UPC: ${upc}`;
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(upc)}&size=250x250&bgcolor=ffffff&color=0f172a&margin=10`;
+  modal.classList.add('active');
+}
+
+function closeQR() {
+  document.getElementById('qrModal').classList.remove('active');
+}
+
+function downloadQR() {
+  const img = document.getElementById('qrImage');
+  const name = document.getElementById('qrProductName').textContent;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = `QR_${name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+  a.target = '_blank';
+  a.click();
 }
