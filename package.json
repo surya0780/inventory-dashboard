@@ -1,0 +1,23 @@
+{
+  "name": "inventory-dashboard",
+  "version": "1.0.0",
+  "description": "Super Premium Inventory Management Dashboard with Vercel Speed Insights",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surya0780/inventory-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/surya0780/inventory-dashboard/issues"
+  },
+  "homepage": "https://github.com/surya0780/inventory-dashboard#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
