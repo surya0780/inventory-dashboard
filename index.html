@@ -105,15 +105,6 @@
     <div class="filter-card">
       <div class="filter-header">
         <h3><i class="fas fa-filter"></i> Filters & Search</h3>
-        <div class="filter-actions-top">
-          <button class="stock-filter-btn good active" id="filterAll" onclick="setStockFilter('all')">All</button>
-          <button class="stock-filter-btn good" id="filterGood" onclick="setStockFilter('good')"><i
-              class="fas fa-check"></i> Good</button>
-          <button class="stock-filter-btn warning" id="filterLow" onclick="setStockFilter('low')"><i
-              class="fas fa-exclamation"></i> Low</button>
-          <button class="stock-filter-btn danger" id="filterOut" onclick="setStockFilter('out')"><i
-              class="fas fa-times"></i> Out</button>
-        </div>
       </div>
       <div class="filter-grid">
         <div class="filter-item">
@@ -131,13 +122,6 @@
           <select id="categoryFilter">
             <option value="">All Categories</option>
           </select>
-        </div>
-        <div class="filter-item checkbox-item">
-          <label class="checkbox-label">
-            <input type="checkbox" id="includeZeroQty">
-            <span class="checkmark"></span>
-            Include Zero Quantity
-          </label>
         </div>
       </div>
     </div>
@@ -258,11 +242,6 @@
               <th data-sort="brand">Brand <i class="fas fa-sort"></i></th>
               <th data-sort="category">Category <i class="fas fa-sort"></i></th>
               <th data-sort="mrp">MRP <i class="fas fa-sort"></i></th>
-              <th data-sort="qty">QTY <i class="fas fa-sort"></i></th>
-              <th data-sort="threshold">Threshold</th>
-              <th>UOM</th>
-              <th data-sort="status">Status <i class="fas fa-sort"></i></th>
-              <th data-sort="last_updated">Last Updated <i class="fas fa-sort"></i></th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -402,6 +381,42 @@
       <!-- Filled dynamically -->
     </div>
   </div>
+
+  <!-- ===== QR CODE MODAL ===== -->
+  <div class="qr-modal-overlay" id="qrModal" onclick="if(event.target===this)closeQR()">
+    <div class="qr-modal">
+      <button class="qr-close" onclick="closeQR()"><i class="fas fa-times"></i></button>
+      <div class="qr-header">
+        <i class="fas fa-qrcode"></i>
+        <h3>Product QR Code</h3>
+      </div>
+      <p class="qr-product-name" id="qrProductName"></p>
+      <div class="qr-image-wrap">
+        <img id="qrImage" alt="QR Code" />
+      </div>
+      <p class="qr-upc-text" id="qrUpcText"></p>
+      <button class="qr-download-btn" onclick="downloadQR()">
+        <i class="fas fa-download"></i> Download QR
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <i class="fas fa-boxes-stacked"></i>
+        <span>Inventory Dashboard</span>
+      </div>
+      <div class="footer-owner">
+        <p><i class="fas fa-user"></i> <strong>Suryaprasath</strong></p>
+        <p><i class="fas fa-phone"></i> <a href="tel:6382799407">6382799407</a></p>
+      </div>
+      <div class="footer-copy">
+        <p>&copy; 2026 All Rights Reserved</p>
+      </div>
+    </div>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
