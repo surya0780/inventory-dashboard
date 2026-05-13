@@ -48,6 +48,7 @@ async function fetchSheetData() {
       if (!productName) continue;
 
       const mrpVal = parseFloat((row[colMap.mrp] || "0").trim()) || 0;
+      const cat = guessCategory((row[colMap.brand] || "").trim(), productName);
 
       const item = {
         item_id: itemId,
@@ -55,8 +56,8 @@ async function fetchSheetData() {
         brand: (row[colMap.brand] || "").trim(),
         upc: (row[colMap.upc] || "").trim(),
         mrp: mrpVal,
-        category: guessCategory((row[colMap.brand] || "").trim(), productName),
-        image: "https://cdn-icons-png.flaticon.com/128/3081/3081559.png"
+        category: cat,
+        image: getCategoryFallbackIcon(cat)
       };
 
       // Keep the entry — if duplicate ITEM_ID, overwrite (last wins)
@@ -142,6 +143,35 @@ function guessCategory(brand, name) {
   if (/dog|pet|cat/.test(n)) return "Pet Care";
   if (/bag|umbrella/.test(n)) return "Accessories";
   return "General";
+}
+
+
+/**
+ * Category fallback icons from Flaticon CDN.
+ */
+function getCategoryFallbackIcon(category) {
+  const icons = {
+    "Ice Cream":     "https://cdn-icons-png.flaticon.com/128/3514/3514516.png",
+    "Dairy":         "https://cdn-icons-png.flaticon.com/128/3050/3050158.png",
+    "Personal Care": "https://cdn-icons-png.flaticon.com/128/2553/2553691.png",
+    "Baby Care":     "https://cdn-icons-png.flaticon.com/128/3081/3081627.png",
+    "Snacks":        "https://cdn-icons-png.flaticon.com/128/2553/2553651.png",
+    "Beverages":     "https://cdn-icons-png.flaticon.com/128/3050/3050095.png",
+    "Instant Food":  "https://cdn-icons-png.flaticon.com/128/1046/1046786.png",
+    "Home Care":     "https://cdn-icons-png.flaticon.com/128/2947/2947656.png",
+    "Grocery":       "https://cdn-icons-png.flaticon.com/128/3724/3724788.png",
+    "Wellness":      "https://cdn-icons-png.flaticon.com/128/2966/2966327.png",
+    "Electronics":   "https://cdn-icons-png.flaticon.com/128/3659/3659899.png",
+    "Toys":          "https://cdn-icons-png.flaticon.com/128/3081/3081559.png",
+    "Home & Living": "https://cdn-icons-png.flaticon.com/128/2271/2271046.png",
+    "Fashion":       "https://cdn-icons-png.flaticon.com/128/2331/2331716.png",
+    "Stationery":    "https://cdn-icons-png.flaticon.com/128/2541/2541988.png",
+    "Non-Veg":       "https://cdn-icons-png.flaticon.com/128/1046/1046751.png",
+    "Pet Care":      "https://cdn-icons-png.flaticon.com/128/1076/1076877.png",
+    "Accessories":   "https://cdn-icons-png.flaticon.com/128/2331/2331895.png",
+    "General":       "https://cdn-icons-png.flaticon.com/128/3081/3081648.png"
+  };
+  return icons[category] || icons["General"];
 }
 
 
